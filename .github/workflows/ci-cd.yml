@@ -1,0 +1,79 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ "master", "develop" ]
+  pull_request:
+    branches: [ "master", "deveop" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: setup prod.yml
+      run: |
+        cd ./src/main/resources
+        sed -i 's|${SPRING_DATASOURCE_URL}|'"${{ secrets.SPRING_DATASOURCE_URL }}"'|g' application-prod.yml
+        sed -i 's|${SPRING_DATASOURCE_USERNAME}|'"${{ secrets.SPRING_DATASOURCE_USERNAME }}"'|g' application-prod.yml
+        sed -i 's|${SPRING_DATASOURCE_PASSWORD}|'"${{ secrets.SPRING_DATASOURCE_PASSWORD }}"'|g' application-prod.yml
+        sed -i 's|${JWT_SECRET}|'"${{ secrets.JWT_SECRET }}"'|g' application-prod.yml
+        sed -i 's|${JWT_ACCESS_EXPIRE}|'"${{ secrets.JWT_ACCESS_EXPIRE }}"'|g' application-prod.yml
+        sed -i 's|${JWT_REFRESH_EXPIRE}|'"${{ secrets.JWT_REFRESH_EXPIRE }}"'|g' application-prod.yml
+        
+    
+    - name: Build with Gradle
+      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+      with:
+        arguments: bootJar
+        
+    # Docker image build
+    - name: Build images docker
+      run: docker build -t ${{ secret.DOCKER_USERNAME }}/ceos-vote-dream .
+
+    # DockerHub login
+    - name: docker login
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    # dockerHub push
+    - name: docker push
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/ceos-vote-dream
+  
+    # Deploy to EC2
+    - name: deloy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_NAME }}
+        key: ${{ secrets.EC2_KEY }}
+        port: 22
+        script: |
+          sudo docker stop ceos-vote-dream || true
+          sudo docker rm ceos-vote-dream || true
+          sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/ceos-vote-dream || true
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/ceos-vote-dream
+          sudo docker run -e SPRING_PROFILES_ACTIVE=prod \
+                      --name ceos-vote-dream \
+                      -p 8080:8080 -d ${{ secrets.DOCKER_USERNAME }}/ceos-vote-dream
+      
+ 
