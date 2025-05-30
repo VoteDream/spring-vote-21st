@@ -39,10 +39,14 @@ jobs:
         sed -i 's|${JWT_REFRESH_EXPIRE}|'"${{ secrets.JWT_REFRESH_EXPIRE }}"'|g' application-prod.yml
         
     
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Grant permission to Gradle wrapper
+      run: chmod +x ./gradlew
+      
     - name: Build with Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-      with:
-        arguments: bootJar
+      run: ./gradlew bootJar -x test
         
     # Docker image build
     - name: Build images docker
