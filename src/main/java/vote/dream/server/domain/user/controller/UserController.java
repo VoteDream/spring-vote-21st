@@ -15,7 +15,7 @@ import vote.dream.server.global.apiPayload.status.SuccessStatus;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/vi/users")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     private final AuthService authService;
