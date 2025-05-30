@@ -46,7 +46,7 @@ jobs:
         
     # Docker image build
     - name: Build images docker
-      run: docker build -t ${{ secret.DOCKER_USERNAME }}/ceos-vote-dream .
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/ceos-vote-dream .
 
     # DockerHub login
     - name: docker login
