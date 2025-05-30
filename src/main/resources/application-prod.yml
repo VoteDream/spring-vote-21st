@@ -6,9 +6,6 @@ server:
       force: true
 
 spring:
-  config:
-    import: "classpath:env/.env.properties"
-
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
