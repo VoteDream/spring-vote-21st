@@ -39,7 +39,6 @@ out/
 
 ### application-dev.yml ###
 application-dev.yml
-application-prod.yml
 .enb-properties.yml
 
 ### docker-compose.yml ###
