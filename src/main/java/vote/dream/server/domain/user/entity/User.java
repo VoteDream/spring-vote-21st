@@ -15,7 +15,7 @@ import lombok.*;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long userId;
 
     @NotNull
     private String loginId;
@@ -34,5 +34,6 @@ public class User {
     @NotNull
     private Team team;
 
+    @NotNull
     private Part part;
 }

@@ -45,7 +45,7 @@ public class AuthService {
     public void register(SignUpRequestDto request) {
         // 로그인 아이디 중복 체크
         if(userRepository.existsByLoginId(request.loginId())) {
-            throw new GeneralException(ErrorStatus._DUPLICATED_LOGINID);
+            throw new GeneralException(ErrorStatus._DUPLICATED_LOGIN_ID);
         }
 
         // 이메일 중복 체크
