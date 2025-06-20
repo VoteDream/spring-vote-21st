@@ -10,23 +10,30 @@ import vote.dream.server.global.apiPayload.code.ErrorReasonDto;
 @AllArgsConstructor
 public enum ErrorStatus implements BaseErrorCode {
 
+    // 500 서버 에러
     _INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "500", "서버 에러, 관리자에게 문의 바랍니다."),
+
+    // 400 클라이언트 에러
     _BAD_REQUEST(HttpStatus.BAD_REQUEST,"400","잘못된 요청입니다."),
-    _UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"401","인증이 필요합니다."),
-
-    _MAIL_ERROR(HttpStatus.BAD_REQUEST, "400", "인증 이메일 전송에 실패하였습니다."),
     _DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "400", "중복된 이메일입니다."),
-    _DUPLICATED_LOGINID(HttpStatus.BAD_REQUEST, "400", "중복된 로그인 ID입니다."),
-    _USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "400", "해당 유저를 찾을 수 없습니다."),
-    _BAD_PASSWORD(HttpStatus.BAD_REQUEST, "400", "잘못된 패스워드입니다."),
-    _NON_EXIST_EMAIL(HttpStatus.BAD_REQUEST, "400", "존재하지 않는 이메일입니다."),
-    _FORBIDDEN_PASSWORD(HttpStatus.FORBIDDEN, "403", "불가능한 패스워드입니다. 패스워드는 영어, 숫자 8~13글자만 가능합니다."),
+    _DUPLICATED_LOGIN_ID(HttpStatus.BAD_REQUEST, "400", "중복된 로그인 아이디입니다."),
+    _USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "400", "아이디와 일치하는 계정이 존재하지 않습니다"),
+    _BAD_PASSWORD(HttpStatus.BAD_REQUEST, "400", "비밀번호가 일치하지 않습니다."),
 
-    _TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "404", "해당 토큰을 찾을 수 없습니다."),
+
+    // 401 인증 에러
+    _UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"401","인증이 필요합니다."),
     _TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "401", "해당 토큰이 만료되었습니다."),
     _TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "401", "해당 토큰이 유효하지 않습니다."),
 
-    _PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST, "400", "패스워드가 일치하지 않습니다."),;
+    // 403 권한 에러
+
+    // 404 리소스 에러
+    _TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "404", "토큰이 없습니다."),;
+
+    // 409 충돌 에러
+
+    // 기타 에러
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;

@@ -1,5 +1,6 @@
 package vote.dream.server.domain.user.service;
 
+import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,10 @@ import vote.dream.server.domain.user.repository.UserRepository;
 import vote.dream.server.global.apiPayload.exception.GeneralException;
 import vote.dream.server.global.apiPayload.status.ErrorStatus;
 
+import java.security.SignatureException;
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -22,12 +27,12 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     // 로그인 로직
-    public JwtDto login(String loginId, String password) {
+    public Map<JwtDto, User> login(String loginId, String password) {
         User newUser = userRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
         if(!passwordEncoder.matches(password, newUser.getPassword())) {
-            throw new GeneralException(ErrorStatus._PASSWORD_NOT_MATCH);
+            throw new GeneralException(ErrorStatus._BAD_PASSWORD);
         }
 
         // CustomDetails 생성
@@ -37,7 +42,13 @@ public class AuthService {
         String accessToken = jwtUtil.createJwtAccessToken(customDetails);
         String refreshToken = jwtUtil.createJwtRefreshToken(customDetails);
 
-        return new JwtDto(accessToken, refreshToken);
+
+        JwtDto jwt = new JwtDto(accessToken, refreshToken);
+
+        Map<JwtDto,User> result= new HashMap<>();
+        result.put(jwt, newUser);
+
+        return result;
     }
 
     // 회원가입 로직
@@ -45,7 +56,7 @@ public class AuthService {
     public void register(SignUpRequestDto request) {
         // 로그인 아이디 중복 체크
         if(userRepository.existsByLoginId(request.loginId())) {
-            throw new GeneralException(ErrorStatus._DUPLICATED_LOGINID);
+            throw new GeneralException(ErrorStatus._DUPLICATED_LOGIN_ID);
         }
 
         // 이메일 중복 체크
@@ -58,6 +69,32 @@ public class AuthService {
         User user = UserConverter.toEntity(request, encoded);
 
         userRepository.save(user);
+
+    }
+
+    // 로그인 중복 확인
+    public void checkLoginId(String loginId) {
+        if (userRepository.existsByLoginId(loginId)) {
+            throw new GeneralException(ErrorStatus._DUPLICATED_LOGIN_ID);
+        }
+    }
+
+    // refresh token 검증
+    public String checkRefreshToken(String refreshToken) throws SignatureException {
+        if(!jwtUtil.validateRefreshToken(refreshToken)) {
+            throw new GeneralException(ErrorStatus._TOKEN_INVALID);
+        }
+
+        String loginId = jwtUtil.getLoginId(refreshToken);
+        User newUser = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
+
+        CustomDetails details = new CustomDetails(newUser);
+        String newAccessToken = jwtUtil.createJwtAccessToken(details);
+
+        return newAccessToken;
+
+
 
     }
 
