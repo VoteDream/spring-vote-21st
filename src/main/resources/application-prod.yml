@@ -5,6 +5,8 @@ server:
       charset: UTF-8
       force: true
 
+
+
 spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL}
