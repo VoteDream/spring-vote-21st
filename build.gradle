@@ -33,6 +33,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+	// test
+	testImplementation 'org.springframework.security:spring-security-test'
+
 	// MySQL Connector
 	implementation("com.mysql:mysql-connector-j:9.2.0")
 
