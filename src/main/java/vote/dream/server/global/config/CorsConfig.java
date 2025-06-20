@@ -19,10 +19,12 @@ public class CorsConfig implements WebMvcConfigurer {
         configuration.setAllowCredentials(true);
 
         // 💡 여기에 프론트 주소를 명시적으로 추가
+        // 백엔드 주소 추가
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:8080",
                 "http://localhost:3000",
-                "https://vote.dream.team"));
+                "https://vote.dream.team",
+                "https://vote-dream.p-e.kr"));
 
         configuration.addAllowedHeader("*");
         configuration.setAllowedMethods(List.of("*"));
