@@ -9,9 +9,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "master", "develop" ]
+    branches: [ "master", "dev" ]
   pull_request:
-    branches: [ "master", "deveop" ]
+    branches: [ "master", "dev" ]
 
 jobs:
   build:
@@ -44,6 +44,10 @@ jobs:
 
     - name: Grant permission to Gradle wrapper
       run: chmod +x ./gradlew
+
+    # Docker Clean
+    - name: Clean up Docker disk space
+      run: docker system prune -af || true
       
     - name: Build with Gradle
       run: ./gradlew bootJar -x test
@@ -77,6 +81,12 @@ jobs:
           sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/ceos-vote-dream || true
           sudo docker pull ${{ secrets.DOCKER_USERNAME }}/ceos-vote-dream
           sudo docker run -e SPRING_PROFILES_ACTIVE=prod \
+                      -e SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }} \
+                      -e SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }} \
+                      -e SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }} \
+                      -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+                      -e JWT_ACCESS_EXPIRE=${{ secrets.JWT_ACCESS_EXPIRE }} \
+                      -e JWT_REFRESH_EXPIRE=${{ secrets.JWT_REFRESH_EXPIRE }} \
                       --name ceos-vote-dream \
                       -p 8080:8080 -d ${{ secrets.DOCKER_USERNAME }}/ceos-vote-dream
       
