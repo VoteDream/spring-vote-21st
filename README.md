@@ -3,210 +3,70 @@ ceos back-end 21st vote project
 <br>
 <br>
 
-
 ---
-# 1. 프백 합동과제 협업 환경 세팅
-### (1) git convention은 어떻게 세팅했는가?
-**1. commit & pr** : commit 메세지와 pr 제목을 동일하게 작성합니다.
-pr 메세지의 경우 전달사항을 간략하게 적습니다.
+#  [프백 합동과제]
 
-**2. issue convention** : pr을 올릴 시 어떤 이슈인지 태그를 사용합니다. (feat/fix/docs 등)
-
-**3. branch 전략** : 현재 과제는 브랜치 1개만 이용했지만 프로젝트에서는 feature, dev, master 3개 브랜치를 이용하여 배포 및 기능 구현 브랜치를 분리하였습니다.
-<br>
-### (2) repository 세팅
-**- 프론트/백 repository**
-: organization에서 back-end, front-end 레포지토리 개발 공간을 마련했습니다.
-
+### (1) 프백 합동과제 요약
+- 20기 파트장 및 데모데이 투표 서비스 만들기
+- 배포 링크 : https://vote-dream.p-e.kr/swagger-ui/index.html#/
+ 
 <br>
 
-
-### (3) 개발 스타일 맞추기
-**1. 폴더 구조**
-- **도메인 중심 설계 기반**
-- **domain / global 폴더 구분** : domain 패키지 아래에 auth, jwt, user 등 기능별 하위 도메인을 분리했습니다.
- global 패키지에는 공통적인 사용되는 설정 클래스(config), 응답 및 예외 처리(common), 유틸 함수(util) 등을 분리했습니다.
-- **계층형 아키텍쳐 구조** : 각 도메인(auth, jwt, user 등) 하위에 controller, service, repository 등의 폴더를 두었습니다.
+### (2) ERD 설계
+![image](https://github.com/user-attachments/assets/af8dfbe1-67a3-450f-8a7e-6b3bfecf3a33)
+> [**주요 고려사항**]<br> 
+> 1. 같은 기능을 담당하는 api를 데모데이/파트장으로 따로 만들 것인가? -> X<br> 
+> 2. 모아서 만들되, voteType의 enum타입으로 데모데이/파트장 투표를 구별하자!<br> 
+> 3. voteType으로 Vote table에서 데모데이/파트장 투표 구별 -> Vote table의 vote_id로 voteRecord(투표 내역), voteItem(투표 항목)을 조회합니다.
 <br>
 
-**2. 파일명, 변수명 convention**
-
-**- 기술 스택 선정**
-| 언어 | Java 17 |
-| --- | --- |
-| framework | spring Boot 3.x |
-| 빌드 도구 | Gradle |
-| DB | MySQL |
-| ORM | Spring data jpa + Hibernate |
-| API 문서화 | Swagger |
-| 테스트 | JUnit5 + Mockito + Swagger |
-| 로그 | Spring Boot Logging (로그 포맷 통일 필요) |
-| 배포 | Docker + AWS EC2 |
-| 형상 관리 | Git + github |
-| 인증/인가 | Spring Security + JWT |
 
 
+### (3) 프론트엔드의 FIGMA 설계
+![image](https://github.com/user-attachments/assets/2aff6a5f-5a50-4026-8ca2-abcf04a7f4f9)
+![image](https://github.com/user-attachments/assets/5cb2389a-ec7f-49a1-9a90-859dc65b3763)
+<br>
 <br>
 
-**- git repo setup**
-- **Repository 이름** : DearDream / VoteDream
-- **branch 전략**
-    - **main** : 운영용
-    - **dev** : 개발 통합
-    - feature/* : 기능 단위 브랜치 → 뒤에는 feature/#1 과 같이 순서를 진행시킴
-    
-    → **feature/기능 단위** 브랜치로 하기로 결정
-    
-    예시) [feature/attendance-fix], [feature/attendance-pagination], [feature/celebrationMsg-admin] 
-    
-- **PR 템플릿 생성**
-    
-    ```java
-    ## 작업 개요
-    - 작업 내용 요약
-    
-    ## 주요 변경 사항
-    - 상세 변경내용 bulltet 형식으로
-    
-    ## 참고 사항
-    - 테스트 방법/ 관련 이슈 등
-    ```
-    
-- **Issue 템플릿**
-    - `FEAT` →  새로운 기능 추가
-    - `REFACTOR`  → 코드 리팩토링
-    - `TEST`  → 테스트 코드, 리팩토링 테스트 코드 추가
-    - `FIX`  → 버그 수정
-    - `DOCS`  → 문서 수정
-    - `BAD` → Write bad code that needs to be improved (리팩토링 필요하다)
-    - `CHORE`  → 기타 변경 사항
 
-- pr 작성 시 아래 방식으로 작성
 
-→ [FIX] ~~
+### (4) API 설계
+![image](https://github.com/user-attachments/assets/a959ed60-c3d1-4f65-ad67-a2548824bd4a)
+> [**고려사항/어려웠던 점/리팩토링사항**]<br>
+> 1. api 간단 설명<br>  
+> ```
+> (1) vote/vote : 투표하는 api
+> (2) vote/status : 개인 투표 여부 확인 api
+> (3) vote/results : 전체 투표 결과를 반환하는 api
+> (4) vote/items : 투표 항목 조회 api
+> (5) vote/ping : 테스트용 동적 메서드 api (DEMODAY와 PARTLEADER enum 구분을 확인하기 위함..)
+> (6) user/register : 회원가입 api
+> (7) user/login : 로그인 api
+> (8) user/check : 로그인 확인 api
+> (9) user/reissue : 리프레쉬 토큰 관련 api
+> ```
+> 2. local로 테스트를 하다가 막날에 rds 데이터베이스 스키마를 만들며 연결 이슈가 있었지만 가볍게 해결하였고.. <br>
 
-→ [CHORE] sorting the numbers
+> 3. 토큰 포함한 api 테스트를 swagger에서 할 수 있다는 사실을 처음 알았습니다. **(여지껏 토큰을 열심히 넣어가며 postman에서 테스트 했는데)** 배포한 후 pr을 올리면 설정값에 따라 자동으로 swagger가 업데이트 되고, 테스트를 간편하게 해볼 수 있다는 점이 편리했습니다. <br>
 
-→ [DOCS] api 명세서 작성
+> 4. rds에 더미 데이터가(프론트엔드/백엔드 팀원분들의 이름, 팀명 리스트) 들어가 있어야 해서 **CommandLineRunner**라는 메서드를 통해 기본 데이터 값을 데이터베이스에 넣어 보았습니다. 처음 실행될 때에만 넣어주고 이후에는 신경을 쓰지 않아도 되어서 좋았고.. 세상에는 편리한 메서드가 많은 것 같아요..<br> 
 
-- pr 작성 할 때 라벨 선택
+> 5. 리팩토링 1 : 업데이트가 너무 잘 되어서 테스트로 넣어둔 api도 같이 올라가서.. (/ping) 지우는 리팩토링을 할 계획입니다. <br> 
+
+> 6. 리팩토링 2 : voteController와 voteService 간 타입을 바꿔주는 등의 잡다한 작업을 converter라는 폴더를 만들어 따로 빼려고 생각중입니다. **(controller - converter - service 구조가 되는 셈.)** 매번 계층 구조 분리의 중요성에 대해 각 과목에서 공부를 하게 되는데 막상 각 계층에 맞는 작업만을 잘 분리해서 넣는건 고민할만한 문제가 되는 것 같습니다. <br>
+
+> 7. 리팩토링 3 : 이것저것 테스트 하다가 발견한 오류 : 팀원분들의 teamId와 Team table의 teamId가 매칭이 뭔가 안되더군요..뭔가 꼬인 것 같아 리팩토링 중에 있습니다. <br>
+
+> 8. 리팩토링 4 : 로그인/회원가입에는 테스트 코드가 있고, vote에 테스트 코드를 추가하려 합니다.
 
 
 <br>
 
-
-**3. - 프로젝트 구조 예시**
-<br>
-```
-com.example.project
-├── domain
-│   ├── user
-│   │   ├── controller
-│   │   ├── service
-│   │   ├── repository
-│   │   ├── dto
-|   |   ├── converter
-|   |   ├── exception
-│   │   └── entity
-│   └── ... (다른 도메인)
-│
-├── global
-│   ├── config            # 전역 설정 (Security, CORS 등)
-│   ├── exception         # 전역 예외 처리
-│   ├── util              # 유틸리티 클래스
-│   ├── common            # 공통 모듈 (ResponseDto 등)
-│   ├── security          # JWT, 필터, 인증/인가 설정 등
-│   └── advice            # 예외 핸들링 @ControllerAdvice 등
-│
-└── Application.java      # main 클래스
-
-```
-
----
-
-### **(4) response format, exception 관리**
-
-**4-1. Response Format 설계 방식**
-- 프로젝트 전반에서 모든 api 응답은 공통 포맷(ApiResponseObject<T>)으로 응답합니다.
-- 기본 구조
-  ```
-  {
-  "isSuccess": true,
-  "code": "SUCCESS",
-  "message": "요청이 성공적으로 처리되었습니다.",
-  "result": { ... }
-  }
-  ```
-- 이를 위해 아래와 같은 DTO를 사용합니다.<br>
-
-**(1) ApiResponseObject<T>**
-
-**(2) ApiResponseJwtDto** : 로그인 시 JWT 토큰 응답 전용
-
-**(3) JwtDto** : accessToken, refreshToken 포함한 내부 DTO
-
-
-**4-2. 예외 처리 방식 요약**
-- 전역 예외 처리(GlobalExceptionHandler)
- -> @RestControllerAdvice + @ExceptionHandler로 통합 처리합니다.
-- 예시 :
-
-```
-{
-  "isSuccess": false,
-  "code": "VALIDATION_ERROR",
-  "message": "비밀번호는 8자 이상이어야 합니다.",
-  "result": null
-}
-```
-
+### (5) 배포
+1. EC2 route53으로 https 배포하려고 했습니다. 그러나 1개 등록 시 달마다 0.5달러를 내야했기에 nginx를 이용하여 무료로 바꿨습니다..
+2. 도메인은 한글에서 무료로 발급받았는데 kro.~로 시작하는 도메인은 예뻐서 그런지 쓰는 사람이 많아서 ssl 인증이 잘 안됐습니다! ..그래서 못생긴 도메인으로 다시 바꿨습니다.
+ 
+ 
 <br>
 
-# 2. 로그인/회원가입 기능 구현
-**- DTO 구조 예시**
-- 회원가입 요청 DTO : SignUpRequestDto
-```
-{
-  "loginId": "string",
-  "password": "string",
-  "email": "string",
-  "part": "FRONTEND",
-  "username": "string",
-  "team": "DEARDREAM"
-}
-```
-
-- 로그인 요청 DTO : LoginRequestDto
-```
-{
-  "loginId": "string",
-  "password": "string"
-}
-```
-
-- 로그인 응답 DTO : ApiResponseJwtDto
-```
-{
-  "isSuccess": true,
-  "code": "SUCCESS",
-  "message": "로그인 성공",
-  "result": {
-    "accessToken": "string",
-    "refreshToken": "string"
-  }
-}
-```
-<br>
-
----
-
-
-# 3. 수동 배포
-- AWS EC2 기반 수동 배포.
-- http://52.78.76.206:8080/swagger-ui/index.html#/ 
-- 프론트엔드와 연결 예시
-![image](https://github.com/user-attachments/assets/a7b6a07c-0e29-4052-b24d-f495b261ae9c)
-<br>
-
-![image](https://github.com/user-attachments/assets/0bd79ea4-1503-43c2-ab1f-5293e558c64a)
 
