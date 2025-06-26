@@ -29,10 +29,13 @@ public class User {
     private String password;
 
     @NotNull
+    @Enumerated(EnumType.STRING)
     private String username;
 
     @NotNull
+    @Enumerated(EnumType.STRING)
     private Team team;
 
+    @NotNull
     private Part part;
 }
