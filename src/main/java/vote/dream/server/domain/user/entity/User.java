@@ -29,7 +29,6 @@ public class User {
     private String password;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
     private String username;
 
     @NotNull
@@ -37,5 +36,6 @@ public class User {
     private Team team;
 
     @NotNull
+    @Enumerated(EnumType.STRING)
     private Part part;
 }
