@@ -27,7 +27,6 @@ public class VoteItem {
     @NotNull
     private Long teamId;
 
-    // 이 부분이 추가됩니다!
     public VoteItem incrementVoteCount() {
         return VoteItem.builder()
                 .voteItemId(this.voteItemId)

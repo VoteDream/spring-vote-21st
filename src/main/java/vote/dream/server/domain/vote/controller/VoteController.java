@@ -1,7 +1,6 @@
 package vote.dream.server.domain.vote.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import vote.dream.server.domain.jwt.Custom.CustomDetails;
@@ -11,9 +10,7 @@ import vote.dream.server.domain.vote.dto.VoteResponseDto;
 import vote.dream.server.domain.vote.entity.Vote;
 import vote.dream.server.domain.vote.entity.VoteType;
 import vote.dream.server.domain.vote.service.VoteService;
-import vote.dream.server.domain.user.entity.User;
 import vote.dream.server.global.apiPayload.ApiResponse;
-import vote.dream.server.global.apiPayload.status.SuccessStatus;
 
 import java.util.List;
 import java.util.Collections;
@@ -55,12 +52,6 @@ public class VoteController {
                                   @AuthenticationPrincipal CustomDetails user) {
         voteService.voteByType(user.getUser().getId(), voteType, dto.getVoteItemId());
         return ApiResponse.onSuccess(null);
-    }
-
-    // 테스트용 동적 메서드
-    @GetMapping("/{voteType}/ping")
-    public ResponseEntity<String> ping(@PathVariable VoteType voteType) {
-        return ResponseEntity.ok("got " + voteType);
     }
 
 }
