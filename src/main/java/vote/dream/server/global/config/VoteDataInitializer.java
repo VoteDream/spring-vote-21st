@@ -2,6 +2,7 @@ package vote.dream.server.global.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import vote.dream.server.domain.vote.entity.Vote;
@@ -14,7 +15,7 @@ import vote.dream.server.domain.vote.entity.Team;
 import vote.dream.server.domain.vote.repository.TeamRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -40,60 +41,42 @@ public class VoteDataInitializer implements CommandLineRunner {
                     .orElseGet(() -> voteRepo.save(new Vote(null, type, VoteStatus.WAITING)));
         }
 
+
         // 3) 파트장 투표용 후보 세팅
         Vote plVote = voteRepo.findByType(VoteType.PARTLEADER).get();
-        List<Long> existingPlItemIds = itemRepo.findByVoteId(plVote.getVoteId())
-                .stream()
-                .map(VoteItem::getVoteItemId)
-                .collect(Collectors.toList());
-
-        // (a) 백엔드 파트장 후보
-        Team backend = teamRepo.findByTeamName("DEARDREAM").get();
-        List<String> backendNames = List.of(
-                "박준형", "서채연", "오지현", "박서연", "한혜수",
-                "박채연", "박정하", "이석원", "임도현", "최근호"
-        );
         Long plVoteId = plVote.getVoteId();
-        Long backendTeamId = backend.getTeamId();
         List<VoteItem> existingPlItems = itemRepo.findByVoteId(plVoteId);
 
-        for (String nm : backendNames) {
-            boolean exists = existingPlItems.stream()
-                    .anyMatch(i ->
-                            i.getSubject().equals(nm)
-                                    && i.getTeamId().equals(backendTeamId)      // ★ getTeamId() 사용
-                    );
-            if (!exists) {
-                itemRepo.save(new VoteItem(
-                        null,
-                        nm,
-                        0,
-                        plVoteId,           // voteId만
-                        backendTeamId       // teamId만
-                ));
-            }
-        }
+        // 팀별 후보 매핑
+        Map<String, List<String>> plCandidatesByTeam = Map.of(
+                "POPUPCYCLE", List.of("박준형", "임도현", "김철흥", "송아영"),
+                "HONEYHOME",   List.of("이석원", "최근호", "신수진", "원채영"),
+                "DEARDREAM",   List.of("오지현", "한혜수", "김영서", "이주희"),
+                "PROMETHA",    List.of("박정하", "서채연", "권동욱", "김서연"),
+                "INFLUEE",     List.of("박채연", "박서연", "최서연", "한서정")
+        );
 
-        // (b) 프론트엔드 파트장 후보
-        Team frontend = teamRepo.findByTeamName("POPUPCYCLE").get();
-        List<String> frontendNames = List.of("김서연", "신수진", "김영서", "원채영",
-                "김철홍", "이주희", "권동욱", "최서연",
-                "송아영", "한서정");
-        Long frontendTeamId = frontend.getTeamId();
-        for (String nm : frontendNames) {
-            boolean exists = existingPlItems.stream()
-                    .anyMatch(i ->
-                            i.getSubject().equals(nm)
-                                    && i.getTeamId().equals(frontendTeamId)    // ★ getTeamId() 사용
-                    );
-            if (!exists) {
-                itemRepo.save(new VoteItem(
-                        null,
-                        nm,
-                        0,
-                        plVoteId,
-                        frontendTeamId
-                ));
+        for (var entry : plCandidatesByTeam.entrySet()) {
+            String teamName = entry.getKey();
+            Long teamId = teamRepo.findByTeamName(teamName)
+                    .orElseThrow()
+                    .getTeamId();
+
+            for (String candidate : entry.getValue()) {
+                boolean exists = existingPlItems.stream()
+                        .anyMatch(i ->
+                                i.getSubject().equals(candidate) &&
+                                        i.getTeamId().equals(teamId)
+                        );
+                if (!exists) {
+                    itemRepo.save(new VoteItem(
+                            null,        // voteItemId (auto-generated)
+                            candidate,   // subject
+                            0,           // voteCount
+                            plVoteId,    // voteId
+                            teamId       // teamId
+                    ));
+                }
             }
         }
 
@@ -101,7 +84,7 @@ public class VoteDataInitializer implements CommandLineRunner {
         // 4) 데모데이 투표용 후보 세팅 (팀 단위)
         Vote ddVote = voteRepo.findByType(VoteType.DEMODAY).get();
         Long ddVoteId = ddVote.getVoteId();
-        for (Team t : teamRepo.findAll()) {
+        for (Team t : teamRepo.findAll(Sort.by(Sort.Direction.ASC, "teamId"))) {
             String teamName = t.getTeamName();
             Long teamId = t.getTeamId();
 
