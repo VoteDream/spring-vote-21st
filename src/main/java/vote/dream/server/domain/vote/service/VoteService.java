@@ -3,6 +3,7 @@ package vote.dream.server.domain.vote.service;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import vote.dream.server.domain.vote.dto.VoteItemDto;
 import vote.dream.server.domain.vote.dto.VoteResponseDto;
@@ -50,7 +51,13 @@ public class VoteService {
     public List<VoteResponseDto> getVoteResults(VoteType voteType) {
         Vote vote = findByType(voteType)
                 .orElseThrow(() -> new IllegalArgumentException("해당 타입의 투표가 없습니다."));
-        return voteItemRepository.findByVoteId(vote.getVoteId())
+        return voteItemRepository.findByVoteId(
+                        vote.getVoteId(),
+                        Sort.by(
+                                Sort.Order.desc("voteCount"),
+                                Sort.Order.asc("voteItemId")    // 동점일 때 아이디 오름차순
+                        )
+                )
                 .stream()
                 .map(item -> new VoteResponseDto(item.getVoteItemId(), item.getSubject(), item.getVoteCount()))
                 .collect(Collectors.toList());
