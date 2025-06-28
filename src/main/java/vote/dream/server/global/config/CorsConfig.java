@@ -24,7 +24,8 @@ public class CorsConfig implements WebMvcConfigurer {
                 "http://localhost:8080",
                 "http://localhost:3000",
                 "https://vote.dream.team",
-                "https://vote-dream.p-e.kr"));
+                "https://vote-dream.p-e.kr",
+                "https://next-vote-21th-omega.vercel.app/"));
 
         configuration.addAllowedHeader("*");
         configuration.setAllowedMethods(List.of("*"));
