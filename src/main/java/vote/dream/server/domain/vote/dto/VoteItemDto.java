@@ -8,5 +8,7 @@ import lombok.Getter;
 public class VoteItemDto {
     private Long voteItemId;
     private String subject;
+    private Long teamId;
+    private Integer voteCount;
 }
 

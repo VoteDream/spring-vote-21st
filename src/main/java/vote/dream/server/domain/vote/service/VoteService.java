@@ -90,16 +90,16 @@ public class VoteService {
 
             for (VoteItem item : items) {
                 if (backend.contains(item.getSubject())) {
-                    backendList.add(new VoteItemDto(item.getVoteItemId(), item.getSubject()));
+                    backendList.add(new VoteItemDto(item.getVoteItemId(), item.getSubject(), item.getTeamId(), item.getVoteCount()));
                 } else if (frontend.contains(item.getSubject())) {
-                    frontendList.add(new VoteItemDto(item.getVoteItemId(), item.getSubject()));
+                    frontendList.add(new VoteItemDto(item.getVoteItemId(), item.getSubject(), item.getTeamId(), item.getVoteCount()));
                 }
             }
             return List.of(backendList, frontendList);
         } else {
             // DEMODAY 등은 기존 1차원 배열 반환
             return items.stream()
-                    .map(item -> new VoteItemDto(item.getVoteItemId(), item.getSubject()))
+                    .map(item -> new VoteItemDto(item.getVoteItemId(), item.getSubject(), item.getTeamId(), item.getVoteCount()))
                     .collect(Collectors.toList());
         }
     }
