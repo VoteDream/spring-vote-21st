@@ -64,6 +64,10 @@ public class AuthService {
             throw new GeneralException(ErrorStatus._DUPLICATED_EMAIL);
         }
 
+        if(userRepository.existsByUsernameAndPartAndTeam(request.username(), request.part(), request.team())) {
+            throw new GeneralException(ErrorStatus._DUPLICATED_USERNAME);
+        }
+
         String encoded = passwordEncoder.encode(request.password());
 
         User user = UserConverter.toEntity(request, encoded);
