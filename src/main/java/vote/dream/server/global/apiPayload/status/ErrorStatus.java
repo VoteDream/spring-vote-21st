@@ -19,6 +19,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _DUPLICATED_LOGIN_ID(HttpStatus.BAD_REQUEST, "400", "중복된 로그인 아이디입니다."),
     _USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "400", "아이디와 일치하는 계정이 존재하지 않습니다"),
     _BAD_PASSWORD(HttpStatus.BAD_REQUEST, "400", "비밀번호가 일치하지 않습니다."),
+    _DUPLICATED_USERNAME(HttpStatus.BAD_REQUEST, "400", "중복된 사용자 이름입니다."),
 
 
     // 401 인증 에러
